@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -21,7 +22,7 @@ var article = Articles{
 func main() {
 	http.HandleFunc("/", getHome)
 	http.HandleFunc("/articles", getArticle)
-	http.HandleFunc("/post-article", postArticle)
+	http.HandleFunc("/post-article", withLogging(postArticle))
 	http.ListenAndServe(":3000", nil)
 }
 
@@ -54,4 +55,13 @@ func getHome(w http.ResponseWriter, r *http.Request) {
 func getArticle(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(article)
+}
+
+//MiddleWare
+func withLogging(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Logged koneksi dari", r.RemoteAddr)
+
+		next.ServeHTTP(w, r)
+	}
 }
